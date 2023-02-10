@@ -52,11 +52,11 @@ dependencies {
      // implementation 'io.agora.rtc:full-screen-sharing:4.1.0-1'
   }
   
-implementation 'io.agora.rtc:full-rtc-basic:4.1.1'
-implementation 'io.agora.rtc:full-ains:3.7.0'
-implementation 'io.agora.rtc:full-jnd:3.7.2.1'
-implementation 'io.agora.rtc:full-full-audio-format:3.7.2.1'
-implementation 'io.agora.rtc:full-super-resolution:4.1.0-1'
+implementation 'io.agora.rtc:full-rtc-basic:3.7.0.3'
+implementation 'io.agora.rtc:full-ains:3.6.2'
+implementation 'io.agora.rtc:full-jnd:3.7.0.3'
+implementation 'io.agora.rtc:full-full-audio-format:3.6.2'
+implementation "io.agora.rtc:full-super-resolution:3.7.0.3"
   
 }
 
