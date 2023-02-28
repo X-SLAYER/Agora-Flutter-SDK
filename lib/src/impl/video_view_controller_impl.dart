@@ -45,6 +45,21 @@ extension VideoViewControllerBaseExt on VideoViewControllerBase {
 mixin VideoViewControllerBaseMixin implements VideoViewControllerBase {
   int _textureId = kTextureNotInit;
 
+  @internal
+  bool get isInitialzed => (rtcEngine as RtcEngineImpl).isInitialzed;
+
+  @internal
+  void addInitializedCompletedListener(VoidCallback listener) {
+    final engine = rtcEngine as RtcEngineImpl;
+    engine.addInitializedCompletedListener(listener);
+  }
+
+  @internal
+  void removeInitializedCompletedListener(VoidCallback listener) {
+    final engine = rtcEngine as RtcEngineImpl;
+    engine.removeInitializedCompletedListener(listener);
+  }
+
   @override
   int getTextureId() => _textureId;
 
@@ -77,7 +92,12 @@ mixin VideoViewControllerBaseMixin implements VideoViewControllerBase {
       mediaPlayerId: canvas.mediaPlayerId,
     );
     if (canvas.uid != 0) {
-      await rtcEngine.setupRemoteVideo(videoCanvas);
+      if (connection != null && rtcEngine is RtcEngineEx) {
+        await (rtcEngine as RtcEngineEx)
+            .setupRemoteVideoEx(canvas: videoCanvas, connection: connection!);
+      } else {
+        await rtcEngine.setupRemoteVideo(videoCanvas);
+      }
     } else {
       await rtcEngine.setupLocalVideo(videoCanvas);
     }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data' show Uint8List;
+import 'dart:ffi' as ffi;
 
 import 'package:agora_rtc_engine/src/agora_base.dart';
 import 'package:agora_rtc_engine/src/agora_media_base.dart';
@@ -34,7 +35,8 @@ import 'package:agora_rtc_engine/src/impl/audio_device_manager_impl.dart'
     as audio_device_manager_impl;
 import 'package:agora_rtc_engine/src/binding/impl_forward_export.dart';
 import 'package:agora_rtc_engine/src/impl/native_iris_api_engine_binding_delegate.dart';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/foundation.dart'
+    show ChangeNotifier, defaultTargetPlatform;
 import 'package:flutter/services.dart' show MethodChannel;
 import 'package:flutter/widgets.dart'
     show
@@ -167,6 +169,20 @@ class _Lifecycle with WidgetsBindingObserver {
   }
 }
 
+@internal
+class InitializationState extends ChangeNotifier {
+  bool _isInitialzed = false;
+  bool get isInitialzed => _isInitialzed;
+  set isInitialzed(bool value) {
+    if (_isInitialzed == value) {
+      return;
+    }
+
+    _isInitialzed = value;
+    notifyListeners();
+  }
+}
+
 class RtcEngineImpl extends rtc_engine_ex_binding.RtcEngineExImpl
     implements RtcEngineEx {
   RtcEngineImpl._(IrisMethodChannel irisMethodChannel)
@@ -175,6 +191,10 @@ class RtcEngineImpl extends rtc_engine_ex_binding.RtcEngineExImpl
   }
 
   static RtcEngineImpl? _instance;
+
+  final InitializationState _rtcEngineState = InitializationState();
+  @internal
+  bool get isInitialzed => _rtcEngineState.isInitialzed;
 
   final _rtcEngineImplScopedKey = const TypedScopedKey(RtcEngineImpl);
 
@@ -187,10 +207,10 @@ class RtcEngineImpl extends rtc_engine_ex_binding.RtcEngineExImpl
   @internal
   final MethodChannel engineMethodChannel = const MethodChannel('agora_rtc_ng');
 
-  static RtcEngineEx create() {
+  static RtcEngineEx create({IrisMethodChannel? irisMethodChannel}) {
     if (_instance != null) return _instance!;
 
-    _instance = RtcEngineImpl._(IrisMethodChannel());
+    _instance = RtcEngineImpl._(irisMethodChannel ?? IrisMethodChannel());
 
     return _instance!;
   }
@@ -211,6 +231,25 @@ class RtcEngineImpl extends rtc_engine_ex_binding.RtcEngineExImpl
 
     await _globalVideoViewController
         .attachVideoFrameBufferManager(irisMethodChannel.getNativeHandle());
+
+    irisMethodChannel.addHotRestartListener(_hotRestartListener);
+
+    _rtcEngineState.isInitialzed = true;
+  }
+
+  void _hotRestartListener(Object? message) {
+    assert(() {
+      // Free `IrisVideoFrameBufferManager` when hot restart
+      final nativeBindingDelegate = IrisApiEngineNativeBindingDelegateProvider()
+              .provideNativeBindingDelegate()
+          as NativeIrisApiEngineBindingsDelegate;
+      nativeBindingDelegate.initialize();
+      nativeBindingDelegate.binding.FreeIrisVideoFrameBufferManager(
+          ffi.Pointer.fromAddress(
+              _globalVideoViewController.videoFrameBufferManagerIntPtr));
+
+      return true;
+    }());
   }
 
   @override
@@ -244,6 +283,16 @@ class RtcEngineImpl extends rtc_engine_ex_binding.RtcEngineExImpl
     await _initializeInternal(context);
   }
 
+  @internal
+  void addInitializedCompletedListener(VoidCallback listener) {
+    _rtcEngineState.addListener(listener);
+  }
+
+  @internal
+  void removeInitializedCompletedListener(VoidCallback listener) {
+    _rtcEngineState.removeListener(listener);
+  }
+
   @override
   Future<void> release({bool sync = false}) async {
     if (_instance == null) return;
@@ -255,6 +304,8 @@ class RtcEngineImpl extends rtc_engine_ex_binding.RtcEngineExImpl
       _lifecycle = null;
     }
 
+    _rtcEngineState.dispose();
+
     await _objectPool.clear();
 
     await _globalVideoViewController
@@ -262,7 +313,7 @@ class RtcEngineImpl extends rtc_engine_ex_binding.RtcEngineExImpl
 
     await super.release(sync: sync);
 
-    // await apiCaller.disposeAsync();
+    irisMethodChannel.removeHotRestartListener(_hotRestartListener);
 
     await irisMethodChannel.dispose();
     _instance = null;
