@@ -44,20 +44,21 @@ android {
 }
 
 dependencies {
-  def agora_sdk_version = "4.1.0-1"
+  def agora_sdk_version = "3.7.0.3"
 
   if (isDev(project)) {
     implementation fileTree(dir: "libs", include: ["*.jar"])
   } else {
-     api 'io.agora.rtc:iris-rtc:4.1.0-rc.2'
+     api 'io.agora.rtc:iris-rtc:3.7.0.3'
      // api 'io.agora.rtc:full-sdk:4.1.0-1'
      // implementation 'io.agora.rtc:full-screen-sharing:4.1.0-1'
   }
   
-    implementation "io.agora.rtc:full-rtc-basic:${agora_sdk_version}"
-    // implementation "io.agora.rtc:ains:${agora_sdk_version}"
-    // implementation 'io.agora.rtc:full-audio-format:3.7.2.1'
-    // implementation "io.agora.rtc:full-super-resolution:${agora_sdk_version}"
+    implementation 'io.agora.rtc:full-rtc-basic:3.7.0.3'
+    implementation 'io.agora.rtc:full-ains:3.6.2'
+    implementation 'io.agora.rtc:full-jnd:3.7.0.3'
+    implementation 'io.agora.rtc:full-full-audio-format:3.6.2'
+    implementation "io.agora.rtc:full-super-resolution:3.7.0.3"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${safeExtGet('kotlin_version', "1.7.21")}"
   
 }
