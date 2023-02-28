@@ -54,11 +54,14 @@ dependencies {
      // implementation 'io.agora.rtc:full-screen-sharing:4.1.0-1'
   }
   
-implementation 'io.agora.rtc:full-rtc-basic:${agora_sdk_version}'
-implementation 'io.agora.rtc:full-ains:3.7.0'
-implementation 'io.agora.rtc:full-jnd:3.6.2'
-implementation 'io.agora.rtc:full-full-audio-format:3.6.2'
-implementation 'io.agora.rtc:full-super-resolution:${agora_sdk_version}'
+    implementation 'io.agora.rtc:full-rtc-basic:${agora_sdk_version}'
+    implementation 'io.agora.rtc:full-ains:3.7.0'
+    implementation 'io.agora.rtc:full-jnd:3.6.2'
+    implementation 'io.agora.rtc:full-full-audio-format:3.6.2'
+    implementation 'io.agora.rtc:full-super-resolution:${agora_sdk_version}'
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${safeExtGet('kotlin_version', "1.7.21")}"
+
   
 }
 
