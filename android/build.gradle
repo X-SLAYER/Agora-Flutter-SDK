@@ -55,10 +55,9 @@ dependencies {
   }
   
     implementation "io.agora.rtc:full-rtc-basic:${agora_sdk_version}"
-    implementation "io.agora.rtc:ains:${agora_sdk_version}"
-    implementation 'io.agora.rtc:full-audio-format:3.7.2.1'
-    implementation "io.agora.rtc:full-super-resolution:${agora_sdk_version}"
-
+    // implementation "io.agora.rtc:ains:${agora_sdk_version}"
+    // implementation 'io.agora.rtc:full-audio-format:3.7.2.1'
+    // implementation "io.agora.rtc:full-super-resolution:${agora_sdk_version}"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${safeExtGet('kotlin_version', "1.7.21")}"
   
 }
